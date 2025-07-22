@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  arangodb:
+    image: arangodb:3.11
+    container_name: stag-arangodb
+    environment:
+      ARANGO_ROOT_PASSWORD: stagpassword
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb_data:/var/lib/arangodb3
+      - arangodb_apps:/var/lib/arangodb3-apps
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8529/_api/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  stag:
+    build: .
+    container_name: stag-v2
+    depends_on:
+      arangodb:
+        condition: service_healthy
+    environment:
+      STAG_SERVER_PORT: 8080
+      STAG_DATABASE_URL: http://arangodb:8529
+      STAG_DATABASE_PASSWORD: stagpassword
+      STAG_LOG_LEVEL: info
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stag-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  arangodb_data:
+  arangodb_apps:
+  prometheus_data:
