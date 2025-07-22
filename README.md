@@ -13,36 +13,66 @@ A high-performance spatial data ingestion and query service built in Go, designe
 
 ## Quick Start
 
-### Prerequisites
+Choose **one** of the following deployment methods:
 
-- Go 1.22+
-- Docker & Docker Compose
-- ArangoDB 3.11+
+### Option 1: Run with Docker (Recommended)
 
-### Running Locally
+**Prerequisites**: Docker & Docker Compose
 
-1. **Start ArangoDB**:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/tabularxr/Stag.git
+   cd Stag
+   ```
+
+2. **Start all services** (ArangoDB, STAG, and Prometheus):
+   ```bash
+   make docker-up
+   ```
+
+3. **Verify it's running**:
+   ```bash
+   curl http://localhost:8080/health
+   ```
+
+That's it! STAG is now running at `http://localhost:8080`
+
+### Option 2: Run Locally (For Development)
+
+**Prerequisites**: Go 1.22+, Docker (for ArangoDB)
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/tabularxr/Stag.git
+   cd Stag
+   ```
+
+2. **Start only ArangoDB in Docker**:
    ```bash
    make docker-up-db
    ```
 
-2. **Set environment variables**:
+3. **Set environment variables**:
    ```bash
    export ARANGO_PASSWORD=stagpassword
    ```
 
-3. **Run STAG**:
+4. **Install dependencies**:
+   ```bash
+   make deps
+   ```
+
+5. **Run STAG locally**:
    ```bash
    make run
    ```
 
-### Running with Docker
+6. **Verify it's running**:
+   ```bash
+   curl http://localhost:8080/health
+   ```
 
-```bash
-make docker-up
-```
-
-This starts ArangoDB, STAG, and Prometheus.
+STAG is now running locally at `http://localhost:8080`
 
 ## API Endpoints
 
